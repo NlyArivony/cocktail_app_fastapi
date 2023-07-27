@@ -1,0 +1,13 @@
+# create virtual env
+-> py -m venv venv
+
+# activate virtualenv
+-> venv/Script/activate
+
+# install requirements.txt
+-> pip install -r requirements.txt
+
+# run project:
+-> uvicorn app.main:app --reload
+
+docs on localhost:port/docs
