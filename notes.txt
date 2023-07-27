@@ -12,8 +12,9 @@
 
 docs on http://127.0.0.1:8000/docs
 
+###############################################################################################
 
-# generate migration:
+# generate migration: (problem: no autodetection of the model change yet)
 alembic revision --autogenerate -m "the message here"
 
 # apply migration
