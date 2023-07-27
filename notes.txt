@@ -10,4 +10,4 @@
 # run project:
 -> uvicorn app.main:app --reload
 
-docs on localhost:port/docs
+docs on http://127.0.0.1:8000/docs
