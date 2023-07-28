@@ -1,9 +1,20 @@
 from sqlalchemy import create_engine, Column, Integer, String, Text, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
+from dotenv import load_dotenv
+import os
+
+""""""
+import psycopg2  # Import psycopg2 to handle PostgreSQL connections
+
+""""""
+
+# Load environment variables from .env
+load_dotenv()
 
 # SQLAlchemy Setup
-DATABASE_URL = "sqlite:///./cocktail.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cocktail.db")
+
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

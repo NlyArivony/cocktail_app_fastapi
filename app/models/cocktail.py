@@ -10,6 +10,7 @@ class Cocktail(Base):
     name = Column(String, index=True, unique=True)
     ingredients = Column(Text)
     instructions = Column(Text)
+    glasstype = Column(Text)
 
     # Add a unique constraint to the combination of (name, )
     __table_args__ = (UniqueConstraint("name", name="_name_uc"),)
