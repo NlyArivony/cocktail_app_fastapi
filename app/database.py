@@ -1,11 +1,11 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, UniqueConstraint
+from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
 
 """"""
-import psycopg2  # Import psycopg2 to handle PostgreSQL connections
+# import psycopg2  # Import psycopg2 to handle PostgreSQL connections
 
 """"""
 

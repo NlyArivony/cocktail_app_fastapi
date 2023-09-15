@@ -25,11 +25,15 @@ pipeline {
 
                     def containerId = docker.image(customImageTag).run("--name ${containerName} -d")
 
+                    // You may wait here if your application requires initialization time
+                    // sleep time: 30, unit: 'SECONDS'
+
                     // Run pytest inside the container
                     sh "docker exec ${containerName} pytest"
 
-                    //docker.container(containerId).stop()
-                    //docker.container(containerId).remove()
+                    // Stop and remove the container
+                    sh "docker stop ${containerName}"
+                    sh "docker rm ${containerName}"
                 }
             }
         }

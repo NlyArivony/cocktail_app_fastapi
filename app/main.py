@@ -1,15 +1,16 @@
 from fastapi import FastAPI
 from app.database import engine, SessionLocal
 from app.controllers import cocktail
-from alembic.config import Config
-from alembic import command
+
+# from alembic.config import Config
+# from alembic import command
 
 # Create the tables in the database
 from app.models.cocktail import Base
 
 
 # Dependency to get the database session
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session
 
 
 def get_db() -> Session:
