@@ -15,7 +15,7 @@ pipeline {
                     sh 'python3 -m venv venv'
 
                     // Activate the virtual environment and install requirements
-                    sh './venv/bin/python3 -m pip install -r requirements-jenkins.txt'
+                    sh './venv/bin/python3 -m pip install -r requirements.txt'
 
                     // Run your FastAPI app using run.py
                     sh './venv/bin/python3 run.py &'
@@ -31,13 +31,21 @@ pipeline {
                 script {
                     // Run pytest inside the same virtual environment
                     sh './venv/bin/python3 -m pytest'
+                }
+            }
+        }
+
+        stage('Code Quality Check') {
+            steps {
+                script {
+                    // Run Flake8 to check code quality on app
+                    sh './venv/bin/flake8 ./app/'
 
                     // Optionally, you can stop the FastAPI app
                     sh 'pkill -f "python3 run.py"'
                 }
             }
         }
-            
 
         stage('Build Docker Image') {
             steps {
@@ -74,7 +82,6 @@ pipeline {
         success {
             // Clean up after a successful pipeline run
             script {
-                sh 'pkill -f "python3 run.py"' // Stop the FastAPI app if it's still running
                 sh 'rm -rf venv' // Remove the virtual environment
             }
         }

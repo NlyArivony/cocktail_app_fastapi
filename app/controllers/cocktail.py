@@ -45,7 +45,9 @@ def create_cocktail(cocktail: CocktailCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/cocktails/", response_model=List[CocktailSchema])
-def read_cocktails(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_cocktails(
+    skip: int = 0, limit: int = 10, db: Session = Depends(get_db)
+):  # noqa
     cocktails = db.query(Cocktail).offset(skip).limit(limit).all()
     return [
         CocktailSchema(
