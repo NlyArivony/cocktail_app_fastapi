@@ -9,7 +9,7 @@ COPY app /app/app
 COPY requirements.txt /app
 COPY main.py /app
 COPY run.py /app
-COPY tests /app
+COPY tests /app/tests
 # COPY .env /app
 
 # Install PostgreSQL development packages and gcc
