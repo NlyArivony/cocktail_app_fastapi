@@ -4,21 +4,34 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the code from your GitHub repository
                 checkout([$class: 'GitSCM', branches: [[name: '*/cicd']], userRemoteConfigs: [[url: 'https://github.com/NlyArivony/cocktail_app_fastapi.git']]])
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
-                // Build your Docker image
                 script {
                     def customImageTag = "my-python-app:${env.BUILD_NUMBER}"
-                    docker.build(customImageTag, ".") // Use "." to specify the current directory (where Dockerfile is located)
+                    docker.build(customImageTag, ".")
                 }
             }
         }
 
-    }
+        stage('Run Tests') {
+            steps {
+                script {
+                    def customImageTag = "my-python-app:${env.BUILD_NUMBER}"
+                    def containerName = "my-container-${env.BUILD_NUMBER}" // Use a unique container name
 
+                    def containerId = docker.image(customImageTag).run("--name ${containerName} -d")
+
+                    // Run pytest inside the container
+                    sh "docker exec ${containerName} pytest"
+
+                    //docker.container(containerId).stop()
+                    //docker.container(containerId).remove()
+                }
+            }
+        }
+    }
 }
