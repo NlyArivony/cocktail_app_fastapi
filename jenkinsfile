@@ -1,64 +1,24 @@
 pipeline {
     agent any
 
-    environment {
-        // Define your environment variables here
-        DOCKER_REGISTRY = 'my-registry'
-        APP_NAME = 'my-fastapi-app'
-        CONTAINER_TAG = 'latest'
-    }
-
     stages {
         stage('Checkout') {
             steps {
                 // Checkout the code from your GitHub repository
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/yourusername/your-fastapi-repo.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/cicd']], userRemoteConfigs: [[url: 'https://github.com/NlyArivony/cocktail_app_fastapi.git']]])
             }
         }
-
-        stage('Run Tests') {
-            steps {
-                // Install dependencies and run pytest
-                sh 'pip install -r requirements.txt'
-                sh 'pytest'
-            }
-        }
-
+        
         stage('Build Docker Image') {
             steps {
+                // Build your Docker image
                 script {
-                    // Build the Docker image
-                    sh 'docker build -t $DOCKER_REGISTRY/$APP_NAME:$CONTAINER_TAG .'
-
-                    // Tag the Docker image
-                    sh 'docker tag $DOCKER_REGISTRY/$APP_NAME:$CONTAINER_TAG $DOCKER_REGISTRY/$APP_NAME:$CONTAINER_TAG'
-
-                    // Push the Docker image to the registry
-                    sh 'docker push $DOCKER_REGISTRY/$APP_NAME:$CONTAINER_TAG'
+                    def customImageTag = "my-python-app:${env.BUILD_NUMBER}"
+                    docker.build(customImageTag, ".") // Use "." to specify the current directory (where Dockerfile is located)
                 }
             }
         }
 
-        stage('Deploy Docker Container') {
-            steps {
-                script {
-                    // Pull the latest Docker image from the registry
-                    sh 'docker pull $DOCKER_REGISTRY/$APP_NAME:$CONTAINER_TAG'
-
-                    // Stop and remove the existing container if it's running
-                    sh 'docker stop $APP_NAME || true'
-                    sh 'docker rm $APP_NAME || true'
-
-                    // Run the Docker container
-                    sh 'docker run -d --name $APP_NAME -p 80:80 $DOCKER_REGISTRY/$APP_NAME:$CONTAINER_TAG'
-                }
-            }
-        }
     }
 
-    post {
-        success {
-            // Trigger any notifications or additional actions on successful deployment
-        }
-    }
 }
