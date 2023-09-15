@@ -8,6 +8,37 @@ pipeline {
             }
         }
 
+        stage('Create Virtual Environment and Run App') {
+            steps {
+                script {
+                    // Create a virtual environment in the fetched source code directory
+                    sh 'python3 -m venv venv'
+
+                    // Activate the virtual environment and install requirements
+                    sh './venv/bin/python3 -m pip install -r requirements-jenkins.txt'
+
+                    // Run your FastAPI app using run.py
+                    sh './venv/bin/python3 run.py &'
+
+                    // Wait for the app to start (you can adjust the sleep duration)
+                    sleep time: 30, unit: 'SECONDS'
+                }
+            }
+        }
+
+        stage('Run Tests (Virtual Environment)') {
+            steps {
+                script {
+                    // Run pytest inside the same virtual environment
+                    sh './venv/bin/python3 -m pytest'
+
+                    // Optionally, you can stop the FastAPI app
+                    sh 'pkill -f "python3 run.py"'
+                }
+            }
+        }
+            
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -17,7 +48,7 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Create container and run Tests') {
             steps {
                 script {
                     def customImageTag = "my-python-app:${env.BUILD_NUMBER}"
@@ -35,6 +66,16 @@ pipeline {
                     sh "docker stop ${containerName}"
                     sh "docker rm ${containerName}"
                 }
+            }
+        }
+    }
+
+    post {
+        success {
+            // Clean up after a successful pipeline run
+            script {
+                sh 'pkill -f "python3 run.py"' // Stop the FastAPI app if it's still running
+                sh 'rm -rf venv' // Remove the virtual environment
             }
         }
     }
