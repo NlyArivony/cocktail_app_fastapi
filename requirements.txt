@@ -5,3 +5,4 @@ pydantic
 alembic
 python-dotenv
 psycopg2
+pytest

@@ -1,2 +1,8 @@
 CI : developer (commit) -> github -> fetch code (git) -> unit test -> checkstyle -> sonarqube analysis -> docker build (artifacts) -> ecr(publish img to ecr)
 CD : ECS(deploy img from ecr)
+
+
+---------------------------
+create ec2 isntance from aws
+choose ubuntu ami :
+a,d 
