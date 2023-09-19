@@ -1,8 +1,21 @@
-CI : developer (commit) -> github -> fetch code (git) -> unit test -> checkstyle -> sonarqube analysis -> docker build (artifacts) -> ecr(publish img to ecr)
+CI : developer (commit) -> github -> fetch code (git) -> create virtualenv -> install packages and run app -> run pytest -> check code quality with flake8 -> docker build (artifacts) -> run and test on container -> ecr(publish img to ecr)
 CD : ECS(deploy img from ecr)
 
 
 ---------------------------
-create ec2 isntance from aws
-choose ubuntu ami :
-a,d 
+create aws ec2 instance for jenkins server 
+    choose ubuntu ami
+    add the app data from jenkins_ec2_appdata.sh to install jenkins and docker, pip, virtualenv and awscli
+
+create IAM user with ECR permission
+
+Create ECR repo
+
+Store aws credential in jenkins
+
+---------------------------------
+jenkins plugin :
+    - docker Pipeline
+    - ecr
+    - aws sdk for credentials
+    - CloudBees Docker Build and Publish

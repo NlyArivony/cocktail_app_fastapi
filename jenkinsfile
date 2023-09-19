@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    environment {
+        registryCredential = 'ecr:us-east-1:awscreds'
+        appRegistry = "640262203741.dkr.ecr.us-east-1.amazonaws.com/fastapi_cocktail_app_image"
+    }
 
     stages {
         stage('Checkout') {
@@ -50,32 +54,49 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def customImageTag = "my-python-app:${env.BUILD_NUMBER}"
-                    docker.build(customImageTag, ".")
+                    // Build the Docker image with a unique tag
+                    def dockerImageTag = "${appRegistry}:${BUILD_NUMBER}"
+                    docker.build(dockerImageTag, ".")
                 }
             }
         }
 
-        stage('Create container and run Tests') {
+        stage('Run Tests in Docker Container') {
             steps {
                 script {
-                    def customImageTag = "my-python-app:${env.BUILD_NUMBER}"
-                    def containerName = "my-container-${env.BUILD_NUMBER}" // Use a unique container name
-
-                    def containerId = docker.image(customImageTag).run("--name ${containerName} -d")
-
-                    // You may wait here if your application requires initialization time
-                    // sleep time: 30, unit: 'SECONDS'
-
-                    // Run pytest inside the container
-                    sh "docker exec ${containerName} pytest"
-
-                    // Stop and remove the container
-                    sh "docker stop ${containerName}"
-                    sh "docker rm ${containerName}"
+                    def dockerContainerName = "my-container-${BUILD_NUMBER}"
+                    
+                    // Run the Docker container
+                    def dockerRunCommand = "docker run -d --name ${dockerContainerName} ${appRegistry}:${BUILD_NUMBER}"
+                    sh dockerRunCommand
+                    
+                    // Wait for the container to start (adjust sleep duration as needed)
+                    sleep time: 30, unit: 'SECONDS'
+                    
+                    // Run pytest inside the Docker container
+                    sh "docker exec ${dockerContainerName} pytest"
+                    
+                    // Stop and remove the Docker container
+                    sh "docker stop ${dockerContainerName}"
+                    sh "docker rm ${dockerContainerName}"
                 }
             }
         }
+
+        stage('Upload App Image') {
+            steps {
+                script {
+                    def dockerImageTag = "${appRegistry}:${BUILD_NUMBER}"
+                    
+                    // Push the Docker image to the registry
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.push(dockerImageTag)
+                        dockerImage.push('latest')
+                    }
+                }
+            }
+        }
+
     }
 
     post {

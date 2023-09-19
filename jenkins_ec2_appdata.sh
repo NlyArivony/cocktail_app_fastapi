@@ -24,10 +24,14 @@ sudo apt install python3-pip -y
 # Install Virtualenv
 sudo pip3 install virtualenv
 
+# install aws cli
+sudo apt install awscli -y
+
 # Restart Jenkins service
 sudo systemctl restart jenkins
 
 # Instructions to install the Docker Pipeline plugin in Jenkins UI are missing
 echo "Please log in to the Jenkins UI and install the Docker Pipeline plugin."
+
 
 # Additional instructions or commands for setting up Docker Pipeline in Jenkins can be added here.
