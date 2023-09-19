@@ -1,8 +1,11 @@
 pipeline {
     agent any
+
     environment {
-        registryCredential = 'ecr:us-east-1:awscreds'
+        registryCredential = credentials('awscreds') // Use the Jenkins credential ID for awscreds
         appRegistry = "640262203741.dkr.ecr.us-east-1.amazonaws.com/fastapi_cocktail_app_image"
+        cocktailAppRegistry = "https://640262203741.dkr.ecr.us-east-1.amazonaws.com"
+        dockerImageTag = "${env.BUILD_NUMBER}" // Define the tag here for consistency
     }
 
     stages {
@@ -54,8 +57,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image with a unique tag
-                    def dockerImageTag = "${appRegistry}:${BUILD_NUMBER}"
+                    // Build the Docker image with a consistent tag
+                    def dockerImageTag = "${appRegistry}:${dockerImageTag}"
                     docker.build(dockerImageTag, ".")
                 }
             }
@@ -67,7 +70,7 @@ pipeline {
                     def dockerContainerName = "my-container-${BUILD_NUMBER}"
                     
                     // Run the Docker container
-                    def dockerRunCommand = "docker run -d --name ${dockerContainerName} ${appRegistry}:${BUILD_NUMBER}"
+                    def dockerRunCommand = "docker run -d --name ${dockerContainerName} ${appRegistry}:${dockerImageTag}"
                     sh dockerRunCommand
                     
                     // Wait for the container to start (adjust sleep duration as needed)
@@ -83,20 +86,23 @@ pipeline {
             }
         }
 
-        stage('Upload App Image') {
+        stage('Upload Docker Image to ECR') {
             steps {
                 script {
-                    def dockerImageTag = "${appRegistry}:${BUILD_NUMBER}"
-                    
-                    // Push the Docker image to the registry
-                    docker.withRegistry('', registryCredential) {
-                        dockerImage.push(dockerImageTag)
-                        dockerImage.push('latest')
-                    }
+                    // Log in to ECR using the credentials from 'awscreds'
+                    sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $appRegistry"
+
+                    // Tag the Docker image for ECR with both build number and "latest"
+                    sh "docker tag ${appRegistry}:${dockerImageTag} $appRegistry:${dockerImageTag}"
+                    sh "docker tag ${appRegistry}:${dockerImageTag} $appRegistry:latest"
+
+                    // Push both tagged Docker images to ECR
+                    sh "docker push ${appRegistry}:${dockerImageTag}"
+                    sh "docker push $appRegistry:latest"
                 }
             }
         }
-
+        
     }
 
     post {
