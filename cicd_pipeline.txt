@@ -13,9 +13,15 @@ Create ECR repo
 
 Store aws credential in jenkins
 
+create ECS cluster
+
+create ECS service
 ---------------------------------
+
+
 jenkins plugin :
     - docker Pipeline
     - ecr
     - aws sdk for credentials
     - CloudBees Docker Build and Publish
+    - Pipeline: AWS Steps (ecs deployment)

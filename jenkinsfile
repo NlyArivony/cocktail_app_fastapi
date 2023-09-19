@@ -6,6 +6,8 @@ pipeline {
         appRegistry = "640262203741.dkr.ecr.us-east-1.amazonaws.com/fastapi_cocktail_app_image"
         cocktailAppRegistry = "https://640262203741.dkr.ecr.us-east-1.amazonaws.com"
         dockerImageTag = "${env.BUILD_NUMBER}" // Define the tag here for consistency
+        cluster = "cocktail_app"
+        service = "cocktailappsvc"
     }
 
     stages {
@@ -102,7 +104,15 @@ pipeline {
                 }
             }
         }
-        
+
+        stage('Deploy to ecs') {
+            steps {
+                withAWS(credentials: 'awscreds', region: 'us-east-1') {
+                sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
+                }
+            }
+        }
+
     }
 
     post {
